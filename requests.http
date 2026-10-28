@@ -1,0 +1,112 @@
+@baseUrl = http://127.0.0.1:3000
+@dishId = 1
+
+### Тест 1: 201, очищена назва, заголовок X-Response-Time
+POST {{baseUrl}}/dishes
+Content-Type: application/json
+
+{
+  "title": "   Борщ український   ",
+  "price": 125.5,
+  "weightGrams": 350,
+  "calories": 180,
+  "isSpicy": false
+}
+
+### Тест 2: 400, property hackerField should not exist
+POST {{baseUrl}}/dishes
+Content-Type: application/json
+
+{
+  "title": "Борщ український",
+  "price": 125.5,
+  "weightGrams": 350,
+  "calories": 180,
+  "isSpicy": false,
+  "hackerField": "malicious"
+}
+
+### Тест 3: 400, рядок замість числа, уніфікована помилка
+POST {{baseUrl}}/dishes
+Content-Type: application/json
+
+{
+  "title": "Борщ український",
+  "price": "125.5",
+  "weightGrams": 350,
+  "calories": 180,
+  "isSpicy": false
+}
+
+### Тест 4: 200, limit у JSON є числом 5
+GET {{baseUrl}}/dishes?limit=5
+
+### Обмеження варіанта 4: 400 для кожного некоректного поля
+POST {{baseUrl}}/dishes
+Content-Type: application/json
+
+{
+  "title": "   ",
+  "price": -1,
+  "weightGrams": 9,
+  "calories": -1,
+  "isSpicy": "false"
+}
+
+### Граничні допустимі значення: 201
+POST {{baseUrl}}/dishes
+Content-Type: application/json
+
+{
+  "title": "Соус чилі",
+  "price": 0.01,
+  "weightGrams": 10,
+  "calories": 0,
+  "isSpicy": true
+}
+
+### Часткове оновлення: 200, інші поля зберігаються
+PATCH {{baseUrl}}/dishes/{{dishId}}
+Content-Type: application/json
+
+{
+  "title": "   Борщ із квасолею   ",
+  "price": 140
+}
+
+### Некоректне оновлення: 400
+PATCH {{baseUrl}}/dishes/{{dishId}}
+Content-Type: application/json
+
+{
+  "weightGrams": 5
+}
+
+### Заборонене null в оновленні: 400
+PATCH {{baseUrl}}/dishes/{{dishId}}
+Content-Type: application/json
+
+{
+  "title": null
+}
+
+### Некоректний query: 400
+GET {{baseUrl}}/dishes?limit=abc
+
+### Зайвий параметр query: 400
+GET {{baseUrl}}/dishes?limit=5&hackerField=malicious
+
+### Отримання однієї страви: 200
+GET {{baseUrl}}/dishes/{{dishId}}
+
+### Некоректний id: 400
+GET {{baseUrl}}/dishes/abc
+
+### Відсутня страва: 404 з уніфікованою структурою
+GET {{baseUrl}}/dishes/999999
+
+### Видалення: 204
+DELETE {{baseUrl}}/dishes/{{dishId}}
+
+### Видалена страва: 404
+GET {{baseUrl}}/dishes/{{dishId}}
